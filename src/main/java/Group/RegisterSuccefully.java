@@ -3,6 +3,7 @@ package Group;
 import com.google.common.annotations.VisibleForTesting;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -12,12 +13,15 @@ import org.testng.annotations.Test;
 import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class RegisterSuccefully {
-    protected static WebDriver driver;
-
+public class RegisterSuccefully extends Utils {
+    //protected static WebDriver driver;
+LoadProp loadProp=new LoadProp();
 
 
     public static String randomDate(){
@@ -37,7 +41,7 @@ public class RegisterSuccefully {
         //set implicity wait for driver object
         driver.manage().timeouts().implicitlyWait(30,TimeUnit.SECONDS);
         //open the website
-        driver.get("https://demo.nopcommerce.com/");
+        driver.get(loadProp.getProperty("Url"));
      }
       //to run after method
       @AfterMethod
@@ -100,7 +104,7 @@ public class RegisterSuccefully {
         //input[@class="your-email"]
         //driver.findElement(By.xpath("//input[@class=\"your-email\"]")).;
         //message
-        driver.findElement(By.xpath("//textarea[@placeholder='Enter personal message (optional).']")).sendKeys("hi");
+        driver.findElement(By.xpath("//textarea[@placeholder='Enter personal message (optional)]")).sendKeys("hi");
         //send email
         driver.findElement(By.name("send-email")).click();
 
@@ -122,29 +126,28 @@ public class RegisterSuccefully {
      Assert.assertEquals(expected,actual);
     }
     @Test(priority = 3)
-    public void userShouldSelectJewelry(){
-        //click on Jewelry
-     driver.findElement(By.linkText("Jewelry")).click();
-     //click on 700.00 - $3,000.00
-        driver.findElement(By.xpath("//a[@href='//demo.nopcommerce.com/jewelry?price=700-3000']")).click();
-        //verify the tile (check filter by price) expected result for jeweley
-       String expectedJewelry="Jwellery";
-       String actualJewelry=driver.findElement(By.tagName("h1")).getText();
+        public  void userShouldbeabletoSelectJewelryByPrice() {
+            //go to Jewelry category
+            driver.findElement(By.linkText("Jewelry")).click();
+            //select price$700-&3000
+            driver.findElement(By.xpath("//a[@href=\"//demo.nopcommerce.com/jewelry?price=700-3000\"]")).click();
+            //find min range
+            String minrange = driver.findElement(By.xpath("//span[@class=\"PriceRange\"][1]")).getText();
+            //replace $ using string  replace() method
+            String minrange1 = String.valueOf(minrange.replace("$", ""));
+            //convert double to int
+            double minrange2 = Double.valueOf(minrange1);
+            //find max range
+            String maxrange = driver.findElement(By.xpath("//span[@class=\"PriceRange\"][2]")).getText();
+            String maxrange1 = String.valueOf(maxrange.replace("$", ""));
+            String maxrange2 = String.valueOf(maxrange1.replace(",", ""));
+            double maxrange3 = Double.valueOf(maxrange2);
+            //Expected result value
+            String myvalue = driver.findElement(By.xpath("//span[@class=\"price actual-price\"]")).getText();
+            String myvalue1 = String.valueOf(myvalue.replace("$", ""));
+            String myvalue2 = String.valueOf(myvalue1.replace(",", ""));
+            double myvalue3 = Double.valueOf(myvalue2);}
 
-        String expectedResultRange = driver.findElement(By.xpath("//span[@class=\"price actual-price\"]")).getText();
-        //replacing characters like $ and ,
-        String replaceString = String.valueOf(expectedResultRange.replace("$", ""));
-        String replaceString2 = String.valueOf(replaceString.replace(",",""));
-        //converting double to int
-        double price = Double.valueOf(replaceString2);
-        //Actual Result
-        Assert.assertTrue( price >= 700 && price <= 3000);
-
-       //Assert.assertEquals(actualJewelry,expectedJewelry);
-        //check price $700.00 - $3,000.00
-     //  String actualrange= driver.findElement(By.xpath(" Assert.assertEquals(expectedMessage, actualMessage);")).getText();
-        //Assert.assertFalse();
-    }
     @Test(priority = 4)
     public void userShouldAbleToAddTwoBooks()
     {//click on books
@@ -172,6 +175,56 @@ public class RegisterSuccefully {
         Assert.assertEquals(actualsku,expectedsku);
         String actualr=driver.findElement(By.xpath("//span[text()='FIRST_PRP'")).getText();
         String expectr="FIRST_PRP";
-        Assert.assertEquals(actualr,expectr);
-    }
-}
+        //
+
+    }@Test(priority = 0)
+    public void books(){
+
+        driver.findElement(By.linkText("Books")).click();
+        //click on book Fahrenheit 451 by Ray Bradbury
+        driver.findElement(By.linkText("Fahrenheit 451 by Ray Bradbury")).click();
+        //add the item in to cart
+        driver.findElement(By.id("add-to-cart-button-37")).click();
+        //click on close
+        driver.findElement(By.className("close")).click();
+        driver.navigate().back();
+        //select the book Pride and Prejudice
+        driver.findElement(By.linkText("Pride and Prejudice")).click();
+        //add to cart the item
+        driver.findElement(By.id("add-to-cart-button-39")).click();
+        driver.findElement(By.className("close")).click();
+        // addtional book
+        driver.findElement(By.linkText("First Prize Pies")).click();
+        //click on add to cart
+        driver.findElement(By.id("add-to-cart-button-38")).click();
+        driver.findElement(By.className("close")).click();
+        //go to the shopping cart
+        driver.findElement(By.linkText("Shopping cart")).click();
+
+        List<WebElement> sku=driver.findElements(By.className("sku-number"));
+        List <String> skuelement=new ArrayList<>();
+
+        for(int i=0;i<sku.size();i++)
+        {
+            skuelement.add(sku.get(i).getText());
+            System.out.println(sku.get(i).getText());
+        }
+
+        List<WebElement>expected=driver.findElements(By.className("product"));
+        List<String>expectedelement=new ArrayList<>();
+
+        for(int i=0;i<expected.size();i++)
+        {
+            expectedelement.add(expected.get(i).getText());
+            System.out.println(expected.get(i).getText());
+        }
+        //converting expectedelement into array from array list
+        String expected1[] = expectedelement.toArray(new String[expectedelement.size()]);
+        System.out.println(Arrays.toString(expected1));
+
+        String actual1[]=skuelement.toArray(new String[skuelement.size()]);
+        System.out.println(Arrays.toString(actual1));
+
+        Assert.assertEquals(expected1,actual1);
+        //String expected1 [] = {"FR_451_RB", "PRIDE_PRJ"};
+}}
